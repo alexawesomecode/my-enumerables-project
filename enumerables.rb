@@ -28,11 +28,7 @@ module Enumerable
         if block_given?
             filtered = []
             index = 0
-            while index < self.size
-               filtered.push(self[i]) if yield(self[index])
-               index+=1
-            end
-            
+            self.my_each { |x| filtered.push(x) if yield(x) }
         end
         filtered
     end
@@ -89,25 +85,21 @@ module Enumerable
         count
     end
 
-    def my_map
-            new_array = []
-            index = 0
-            if block_given?
-                while index < self.size
-                new_array << yield(self[index])
-                index+=1
-                end     
-            end 
-        
-
-        
+    def my_map(proc = nil)
+        new_array = []
+        index = 0
+        if proc 
+            self.my_each { |x| new_array << proc.call(x)}
+        end
+        if block_given?
+            self.my_each {|x| new_array << yield(x)}
+        end             
         new_array
     end
 
     def my_inject
         if block_given?
             acumulator = self[0]
-            item = 0
             index = 1
             while index < self.size
                 acumulator = yield(acumulator, self[index])
@@ -118,20 +110,12 @@ module Enumerable
         acumulator
     end
 
-    def multiply_els(x)
-        if block_given?
-        result = 0
-        index = 0
-        while index < self.size
-            result = yield(self[index])
-            index+=1
-    
-        end
-    end
-    result
+    def multiply_els
+
+        self.my_inject{|a,b| a * b}
+         
     end
 end
 
-test_proc = Proc.new { |x| x * 3}
 
-puts [1,2,2].my_map(&test_proc)
+# puts [12,3,4,4,33].my_map {|x| x ** 2}
