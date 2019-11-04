@@ -103,30 +103,34 @@ module Enumerable
     new_array
   end
 
-  def my_inject(args = nil)
-    if args.class == Symbol
-    end
-    if args.class == Integer
+  def my_inject(*args)
+    if args[1].class == Symbol && args[0].class == Integer
       acumulator = args[0]
-      index = 1
+      index = 0
       while index < size
-        acumulator = yield(acumulator, self[index])
+        acumulator = acumulator.send(args[1], self[index])
         index += 1
       end
-      acumulator
+      return acumulator
+    end
 
+    if args[0].class == Symbol
+      acumulator = 0
+      my_each { |x| acumulator = acumulator.send(args[0], x) }
+      return acumulator
     end
 
     if block_given?
-      acumulator = self[0]
-      index = 1
+      acumulator = 0
+      index = 0
       while index < size
         acumulator = yield(acumulator, self[index])
         index += 1
       end
-
+      acumulator += args[0] if args[0].class == Integer
+      acumulator += self[0] if args[0].nil?
+      return acumulator
     end
-    acumulator
   end
 end
 
@@ -134,5 +138,4 @@ def multiply_els(x)
   x.my_inject([x]) { |a, b| a * b }
 end
 
-puts [1, 2, 3, 3, 3, 5].my_any? { |x| x == 1 }
-
+puts [1, 1, 2, 3].my_inject(100) { |a, b| a + b }
