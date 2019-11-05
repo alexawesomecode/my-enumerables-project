@@ -38,6 +38,8 @@ module Enumerable
     if pattern.class == Regexp
       my_each { |x| not_all = 1 if pattern.match(x).nil? }
       not_all != 1
+    else
+      my_each { |x| not_all = 1 if x != pattern }
     end
     if block_given?
       index = 0
@@ -53,14 +55,20 @@ module Enumerable
 
   def my_any?(pattern = nil, &block)
     any = 0
+    if !block_given? && pattern.nil?
+      my_each { |x| any = 1 if x == true || !x.nil? }
+    end
     if pattern.class == Regexp
       my_each { |x| any = 1 unless pattern.match(x).nil? }
       any == 1
+    else
+      my_each { |x| any = 1 unless x != pattern }
     end
     if block_given?
       any = 1 unless my_none?(pattern = nil, &block)
       any == 1
     end
+    any == 1
   end
 
   def my_none?(pattern = nil)
@@ -82,7 +90,7 @@ module Enumerable
 
   def my_count(j = nil)
     count = 0
-    return to_enum(:my_count) if j.nil? && !block_given?
+    return size if j.nil? && !block_given?
     if block_given?
       index = 0
       while index < size
@@ -104,11 +112,13 @@ module Enumerable
   end
 
   def my_inject(*args)
+    array_self = self.class == Range ? to_a : self
+
     if args[1].class == Symbol && args[0].class == Integer
       acumulator = args[0]
       index = 0
       while index < size
-        acumulator = acumulator.send(args[1], self[index])
+        acumulator = acumulator.send(args[1], array_self[index])
         index += 1
       end
       return acumulator
@@ -124,11 +134,11 @@ module Enumerable
       acumulator = 0
       index = 0
       while index < size
-        acumulator = yield(acumulator, self[index])
+        acumulator = yield(acumulator, array_self[index])
         index += 1
       end
       acumulator += args[0] if args[0].class == Integer
-      acumulator += self[0] if args[0].nil?
+      acumulator += array_self[0] if args[0].nil?
       return acumulator
     end
   end
@@ -137,5 +147,3 @@ end
 def multiply_els(x)
   x.my_inject([x]) { |a, b| a * b }
 end
-
-puts [1, 1, 2, 3].my_inject(100) { |a, b| a + b }
