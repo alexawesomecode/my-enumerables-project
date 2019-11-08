@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/PerceivedComplexity:
 module Enumerable
   def my_each
     return to_enum(:my_each) unless block_given?
@@ -48,7 +52,6 @@ module Enumerable
         index += 1
         break if not_all == 1
       end
-
     end
     not_all != 1
   end
@@ -98,7 +101,6 @@ module Enumerable
         index += 1
       end
     end
-
     my_each { |x| count += 1 if x == j } unless j.nil?
     count
   end
@@ -113,32 +115,20 @@ module Enumerable
 
   def my_inject(*args)
     array_self = self.class == Range ? to_a : self
-
-    if args[1].class == Symbol && args[0].class == Integer
-      acumulator = args[0]
-      index = 0
-      while index < size
-        acumulator = acumulator.send(args[1], array_self[index])
-        index += 1
-      end
-      return acumulator
-    end
-
-    if args[0].class == Symbol
-      acumulator = 0
-      my_each { |x| acumulator = acumulator.send(args[0], x) }
-      return acumulator
-    end
-
     if block_given?
       acumulator = 0
-      index = 0
-      while index < size
-        acumulator = yield(acumulator, array_self[index])
-        index += 1
-      end
+      array_self.my_each { |x| acumulator = yield(acumulator, x) }
       acumulator += args[0] if args[0].class == Integer
       acumulator += array_self[0] if args[0].nil?
+      return acumulator
+    end
+    if args[1].class == Symbol && args[0].class == Integer
+      acumulator = args[0]
+      array_self.my_each { |x| acumulator = acumulator.send(args[1], x) }
+      return acumulator
+    elsif args[0].class == Symbol
+      acumulator = 0
+      my_each { |x| acumulator = acumulator.send(args[0], x) }
       return acumulator
     end
   end
@@ -147,3 +137,6 @@ end
 def multiply_els(x)
   x.my_inject([x]) { |a, b| a * b }
 end
+
+# rubocop:enable Metrics/CyclomaticComplexity
+# rubocop:enable Metrics/PerceivedComplexity:
