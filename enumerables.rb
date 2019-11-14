@@ -79,6 +79,8 @@ module Enumerable
     if pattern.class == Regexp
       my_each { |x| some = 1 unless pattern.match(x).nil? }
       some == 1
+    else
+      my_each { |x| some = 1 if pattern == x }
     end
     if block_given?
       index = 0
@@ -115,22 +117,36 @@ module Enumerable
 
   def my_inject(*args)
     array_self = self.class == Range ? to_a : self
+
     if block_given?
-      acumulator = 0
-      array_self.my_each { |x| acumulator = yield(acumulator, x) }
-      acumulator += args[0] if args[0].class == Integer
-      acumulator += array_self[0] if args[0].nil?
-      return acumulator
+      if args[1].class == Symbol && args[0].class == Integer
+        acumulator = args[0]
+        array_self.my_each { |x| acumulator = acumulator.send(args[1], x) }
+      elsif args[0].class == Symbol
+        acumulator = 0
+        my_each { |x| acumulator = acumulator.send(args[0], x) }
+
+      elsif args[0].class == Integer
+        acumulator = args[0]
+        array_self.my_each { |x| acumulator = yield(acumulator, x) }
+      else
+        acumulator = 0
+        array_self.my_each { |x| acumulator = yield(acumulator, x) }
+        acumulator += args[0] if args[0].class == Integer
+        acumulator += array_self[0] if args[0].nil?
+
+      end
+      acumulator
     end
-    if args[1].class == Symbol && args[0].class == Integer
-      acumulator = args[0]
-      array_self.my_each { |x| acumulator = acumulator.send(args[1], x) }
-      return acumulator
-    elsif args[0].class == Symbol
-      acumulator = 0
-      my_each { |x| acumulator = acumulator.send(args[0], x) }
-      return acumulator
+    # rubocop:disable Style/GuardClause
+    unless block_given?
+      if args[1].class == Symbol && args[0].class == Integer
+        acumulator = args[0]
+        array_self.my_each { |x| acumulator = acumulator.send(args[1], x) }
+        acumulator
+      end
     end
+    # rubocop:enable Style/GuardClause
   end
 end
 
