@@ -107,9 +107,9 @@ module Enumerable
     some != 1
   end
 
-  def my_count(j = nil)
+  def my_count(args = nil)
     count = 0
-    return size if j.nil? && !block_given?
+    return size if args.nil? && !block_given?
 
     if block_given?
 
@@ -119,7 +119,7 @@ module Enumerable
         index += 1
       end
     end
-    my_each { |x| count += 1 if x == j } unless j.nil?
+    my_each { |x| count += 1 if x == args } unless args.nil?
     count
   end
 
