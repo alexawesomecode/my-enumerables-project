@@ -2,10 +2,13 @@
 
 # rubocop:disable Metrics/CyclomaticComplexity
 # rubocop:disable Metrics/PerceivedComplexity:
+
 module Enumerable
   def my_each
     return to_enum(:my_each) unless block_given?
+
     if block_given?
+
       item = 0
       while item < size
         yield(self[item])
@@ -18,7 +21,9 @@ module Enumerable
 
   def my_each_with_index
     return to_enum(:my_each_with_index) unless block_given?
+
     if block_given?
+
       index = 0
       while index < size
         yield(self[index], index)
@@ -30,7 +35,9 @@ module Enumerable
 
   def my_select
     return to_enum(:my_select) unless block_given?
+
     if block_given?
+
       filtered = []
       my_each { |x| filtered.push(x) if yield(x) }
     end
@@ -45,7 +52,9 @@ module Enumerable
     else
       my_each { |x| not_all = 1 if x != pattern }
     end
+
     if block_given?
+
       index = 0
       while index < size
         not_all = 1 unless yield(self[index])
@@ -59,6 +68,7 @@ module Enumerable
   def my_any?(pattern = nil, &block)
     any = 0
     if !block_given? && pattern.nil?
+
       my_each { |x| any = 1 if x == true || !x.nil? }
     end
     if pattern.class == Regexp
@@ -67,7 +77,9 @@ module Enumerable
     else
       my_each { |x| any = 1 unless x != pattern }
     end
+
     if block_given?
+
       any = 1 unless my_none?(pattern = nil, &block)
       any == 1
     end
@@ -82,7 +94,9 @@ module Enumerable
     else
       my_each { |x| some = 1 if pattern == x }
     end
+
     if block_given?
+
       index = 0
       while index < size
         some = 1 if yield(self[index])
@@ -96,7 +110,9 @@ module Enumerable
   def my_count(j = nil)
     count = 0
     return size if j.nil? && !block_given?
+
     if block_given?
+
       index = 0
       while index < size
         count += 1 if yield(self[index])
@@ -109,6 +125,7 @@ module Enumerable
 
   def my_map(proc = nil)
     return to_enum(:my_map) unless block_given?
+
     new_array = []
     my_each { |x| new_array << proc.call(x) } if proc
     my_each { |x| new_array << yield(x) } if block_given?
@@ -119,6 +136,7 @@ module Enumerable
     array_self = self.class == Range ? to_a : self
 
     if block_given?
+
       if args[1].class == Symbol && args[0].class == Integer
         acumulator = args[0]
         array_self.my_each { |x| acumulator = acumulator.send(args[1], x) }
@@ -139,7 +157,9 @@ module Enumerable
       acumulator
     end
     # rubocop:disable Style/GuardClause
+
     unless block_given?
+
       if args[1].class == Symbol && args[0].class == Integer
         acumulator = args[0]
         array_self.my_each { |x| acumulator = acumulator.send(args[1], x) }
@@ -151,7 +171,7 @@ module Enumerable
 end
 
 def multiply_els(args)
-  x.my_inject([args]) { |a, b| a * b }
+  args.my_inject([args]) { |a, b| a * b }
 end
 
 # rubocop:enable Metrics/CyclomaticComplexity
