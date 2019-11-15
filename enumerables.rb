@@ -150,8 +150,8 @@ module Enumerable
   end
 end
 
-def multiply_els(x)
-  x.my_inject([x]) { |a, b| a * b }
+def multiply_els(args)
+  x.my_inject([args]) { |a, b| a * b }
 end
 
 # rubocop:enable Metrics/CyclomaticComplexity
